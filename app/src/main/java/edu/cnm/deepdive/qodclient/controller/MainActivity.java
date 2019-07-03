@@ -1,14 +1,10 @@
 package edu.cnm.deepdive.qodclient.controller;
 
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog.Builder;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
@@ -32,17 +28,9 @@ public class MainActivity extends AppCompatActivity {
     setupViewModel();
   }
 
-  private void setupViewModel() {
-    View rootView = findViewById(R.id.root_view);
-    viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-    viewModel.getRandomQuote().observe(this, (quote) -> {
-      new AlertDialog.Builder(this)
-          .setMessage(quote.getText() + quote.getCombinedSources())
-          .setTitle("Random Quote") // TODO Extract to resource.
-          .setNeutralButton("Cool!", (dialogInterface, i) -> {})
-          .create()
-          .show();
-    });
+  private void setupToolbar() {
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
   }
 
   private void setupFab() {
@@ -50,9 +38,22 @@ public class MainActivity extends AppCompatActivity {
     fab.setOnClickListener(view -> viewModel.getRandomQuote());
   }
 
-  private void setupToolbar() {
-    Toolbar toolbar = findViewById(R.id.toolbar);
-    setSupportActionBar(toolbar);
+  private void setupViewModel() {
+    View rootView = findViewById(R.id.root_view);
+    viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+    viewModel.getRandomQuote().observe(this, (quote) ->
+        showQuote(quote, getString(R.string.random_quote_title)));
+  }
+
+  private void showQuote(Quote quote, String title) {
+    new Builder(this)
+        .setMessage(quote.getCombinedText(getString(R.string.combined_quote_pattern),
+            getString(R.string.source_delimiter), getString(R.string.unknown_source)))
+        .setTitle(title)
+        .setPositiveButton(R.string.dialog_next, (dialogInterface, i) -> viewModel.getRandomQuote())
+        .setNegativeButton(R.string.dialog_done, (dialogInterface, i) -> {})
+        .create()
+        .show();
   }
 
   @Override

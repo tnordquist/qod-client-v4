@@ -4,12 +4,12 @@ import java.net.URI;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public class Quote {
 
-  private static final String UNKNOWN_SOURCE = "(unknown)";
-  protected static final String DELIMITER = ", ";
+  private static final String DELIMITER = ", ";
 
   private UUID id;
 
@@ -61,19 +61,19 @@ public class Quote {
     this.sources = sources;
   }
 
-  public String getCombinedSources() {
-    StringBuilder builder = new StringBuilder(" \u2014 "); // TODO Extract.
+  public String getCombinedText(String pattern, String delimiter, String unknownSource) {
+    StringBuilder builder = new StringBuilder();
     if (sources.isEmpty()) {
-      builder.append(UNKNOWN_SOURCE);
+      builder.append(unknownSource);
     } else {
       for (Source source : sources) {
         builder
             .append(source.getName())
-            .append(DELIMITER);
+            .append(delimiter);
       }
-      builder.delete(builder.length() - DELIMITER.length(), builder.length());
+      builder.delete(builder.length() - delimiter.length(), builder.length());
     }
-    return builder.toString();
+    return String.format(pattern, text, builder);
   }
 
 }

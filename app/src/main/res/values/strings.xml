@@ -1,4 +1,10 @@
 <resources>
   <string name="app_name">QoD Client</string>
   <string name="action_settings">Settings</string>
+  <string name="dialog_done">Done</string>
+  <string name="dialog_next">Next</string>
+  <string name="random_quote_title">Random Quote</string>
+  <string name="combined_quote_pattern" formatted="false">%s%n%n\t\t&#x2014; %s</string>
+  <string name="source_delimiter">,&#x00A0;</string>
+  <string name="unknown_source">(unknown)</string>
 </resources>
