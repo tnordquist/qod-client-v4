@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
   private void setupViewModel() {
     viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+    getLifecycle().addObserver(viewModel);
     viewModel.getRandomQuote().observe(this, (quote) ->
         showQuote(quote, getString(R.string.random_quote_title), () -> viewModel.getRandomQuote()));
     viewModel.search(null).observe(this, (quotes) -> {
