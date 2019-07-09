@@ -5,6 +5,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AlertDialog.Builder;
 import androidx.appcompat.widget.TooltipCompat;
 import androidx.lifecycle.ViewModelProviders;
@@ -45,12 +46,13 @@ public class MainActivity extends AppCompatActivity {
       String term = searchTerm.getText().toString().trim();
       String title = term.isEmpty() ? getString(R.string.search_all)
           : getString(R.string.search_title_format, term);
-      showQuote(quote, title, () -> {
+      Runnable next = (position >= adapterView.getCount() - 1) ? null : () -> {
         if (position < adapterView.getCount() - 1) {
           searchResults.performItemClick(null, position + 1,
               searchResults.getItemIdAtPosition(position + 1));
         }
-      });
+      };
+      showQuote(quote, title, next);
     });
   }
 
@@ -78,14 +80,15 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void showQuote(Quote quote, String title, Runnable nextAction) {
-    new Builder(this)
+    AlertDialog.Builder builder = new Builder(this)
         .setMessage(quote.getCombinedText(getString(R.string.combined_quote_pattern),
             getString(R.string.source_delimiter), getString(R.string.unknown_source)))
         .setTitle(title)
-        .setPositiveButton(R.string.dialog_next, (dialogInterface, i) -> nextAction.run())
-        .setNegativeButton(R.string.dialog_done, (dialogInterface, i) -> {})
-        .create()
-        .show();
+        .setNegativeButton(R.string.dialog_done, (dialogInterface, i) -> {});
+    if (nextAction != null) {
+      builder.setPositiveButton(R.string.dialog_next, (dialogInterface, i) -> nextAction.run());
+    }
+    builder.create().show();
   }
 
 }
