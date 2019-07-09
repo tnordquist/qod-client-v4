@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     searchResults = findViewById(R.id.search_results);
     search.setOnClickListener((v) -> viewModel.search(searchTerm.getText().toString().trim()));
     clear.setOnClickListener((v) -> {
-      searchTerm.setText("");
+      searchTerm.getText().clear();
       viewModel.search(null);
     });
     searchResults.setOnItemClickListener((adapterView, view, position, rowId) -> {
