@@ -4,12 +4,11 @@ import java.net.URI;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.UUID;
 
 public class Quote {
 
-  private static final String DELIMITER = ", ";
+  private static final String TO_STRING_FORMAT = "%s %s";
 
   private UUID id;
 
@@ -67,13 +66,16 @@ public class Quote {
       builder.append(unknownSource);
     } else {
       for (Source source : sources) {
-        builder
-            .append(source.getName())
-            .append(delimiter);
+        builder.append(source).append(delimiter);
       }
-      builder.delete(builder.length() - delimiter.length(), builder.length());
     }
-    return String.format(pattern, text, builder);
+    return String.format(pattern,
+        text, builder.substring(0, builder.length() - delimiter.length()));
+  }
+
+  @Override
+  public String toString() {
+    return String.format(TO_STRING_FORMAT, text, sources);
   }
 
 }
