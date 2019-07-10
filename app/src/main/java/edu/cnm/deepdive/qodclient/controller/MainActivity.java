@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             searchResults.getItemIdAtPosition(position + 1));
       }
     };
-    showQuote(quote, title, next, null);
+    showQuote(quote, title, next);
   }
 
   private void setupViewModel() {
@@ -79,8 +79,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     getLifecycle().addObserver(viewModel);
     viewModel.randomQuote().observe(this, (quote) -> {
       if (!randomIgnored) {
-        showQuote(quote, getString(R.string.random_quote_title),
-            () -> viewModel.getRandomQuote(), () -> randomIgnored = true);
+        showQuote(quote, getString(R.string.random_quote_title), () -> viewModel.getRandomQuote());
       }
     });
     viewModel.searchResults().observe(this, (quotes) -> {
@@ -117,16 +116,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     TooltipCompat.setTooltipText(fab, getString(R.string.random_quote_tooltip));
   }
 
-  private void showQuote(Quote quote, String title, Runnable nextAction, Runnable doneAction) {
+  private void showQuote(Quote quote, String title, Runnable nextAction) {
     AlertDialog.Builder builder = new Builder(this)
         .setMessage(quote.getCombinedText(getString(R.string.combined_quote_pattern),
             getString(R.string.source_delimiter), getString(R.string.unknown_source)))
         .setTitle(title)
-        .setNegativeButton(R.string.dialog_done, (dialogInterface, i) -> {
-          if (doneAction != null) {
-            doneAction.run();
-          }
-        });
+        .setNegativeButton(R.string.dialog_done, (dialogInterface, i) -> {});
     if (nextAction != null) {
       builder.setPositiveButton(R.string.dialog_next, (dialogInterface, i) -> nextAction.run());
     }
