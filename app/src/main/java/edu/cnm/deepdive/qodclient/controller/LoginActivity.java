@@ -1,4 +1,4 @@
-package edu.cnm.deepdive.qodclient;
+package edu.cnm.deepdive.qodclient.controller;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
-import edu.cnm.deepdive.qodclient.controller.MainActivity;
+import edu.cnm.deepdive.qodclient.R;
 import edu.cnm.deepdive.qodclient.service.GoogleSignInService;
 
 public class LoginActivity extends AppCompatActivity {

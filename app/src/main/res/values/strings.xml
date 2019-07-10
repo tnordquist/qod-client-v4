@@ -13,4 +13,5 @@
   <string name="search_title_format">Search: %s</string>
   <string name="search_all">All quotes</string>
   <string name="authentication_error">Unable to authenticate user</string>
+  <string name="sign_out">Sign out</string>
 </resources>

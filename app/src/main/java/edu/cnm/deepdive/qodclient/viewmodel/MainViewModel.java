@@ -26,23 +26,30 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
     super(application);
   }
 
-  public LiveData<Quote> getRandomQuote() {
+  public LiveData<Quote> randomQuote() {
     if (random == null) {
       random = new MutableLiveData<>();
     }
+    return random;
+  }
+
+  public void getRandomQuote() {
     pending.add(
         QodService.getInstance().random()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe((quote) -> random.setValue(quote))
     );
-    return random;
   }
 
-  public LiveData<List<Quote>> search(String term) {
+  public LiveData<List<Quote>> searchResults() {
     if (searchResults == null) {
       searchResults = new MutableLiveData<>();
     }
+    return searchResults;
+  }
+
+  public void search(String term) {
     if (term != null) {
       pending.add(
           QodService.getInstance().search(term)
@@ -53,7 +60,6 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
     } else {
       searchResults.setValue(new LinkedList<>());
     }
-    return searchResults;
   }
 
   @OnLifecycleEvent(Event.ON_STOP)
