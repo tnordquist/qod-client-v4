@@ -2,6 +2,9 @@ package edu.cnm.deepdive.qodclient.viewmodel;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
+import androidx.databinding.Bindable;
+import androidx.databinding.Observable;
+import androidx.databinding.PropertyChangeRegistry;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.Lifecycle.Event;
 import androidx.lifecycle.LifecycleObserver;
@@ -16,8 +19,11 @@ import io.reactivex.schedulers.Schedulers;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MainViewModel extends AndroidViewModel implements LifecycleObserver {
+public class MainViewModel extends AndroidViewModel
+    implements Observable, LifecycleObserver {
 
+  private PropertyChangeRegistry callbacks = new PropertyChangeRegistry();
+  private String searchTerm;
   private MutableLiveData<Quote> random;
   private MutableLiveData<List<Quote>> searchResults;
   private CompositeDisposable pending = new CompositeDisposable();
@@ -33,7 +39,7 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
     return random;
   }
 
-  public void getRandomQuote() {
+  public void nextRandomQuote() {
     pending.add(
         QodService.getInstance().random()
             .subscribeOn(Schedulers.io())
@@ -49,10 +55,10 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
     return searchResults;
   }
 
-  public void search(String term) {
-    if (term != null) {
+  public void search() {
+    if (searchTerm != null) {
       pending.add(
-          QodService.getInstance().search(term)
+          QodService.getInstance().search(searchTerm)
               .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe((quotes) -> searchResults.setValue(quotes))
@@ -62,9 +68,36 @@ public class MainViewModel extends AndroidViewModel implements LifecycleObserver
     }
   }
 
+  @Bindable
+  public String getSearchTerm() {
+    return searchTerm;
+  }
+
+  public void setSearchTerm(String searchTerm) {
+    this.searchTerm = searchTerm;
+  }
+
   @OnLifecycleEvent(Event.ON_STOP)
   public void disposePending() {
     pending.clear();
+  }
+
+  @Override
+  public void addOnPropertyChangedCallback(OnPropertyChangedCallback callback) {
+    callbacks.add(callback);
+  }
+
+  @Override
+  public void removeOnPropertyChangedCallback(OnPropertyChangedCallback callback) {
+    callbacks.remove(callback);
+  }
+
+  private void notifyChange() {
+    callbacks.notifyCallbacks(this, 0, null);
+  }
+
+  private void notifyPropertyChanged(int fieldId) {
+    callbacks.notifyCallbacks(this, fieldId, null);
   }
 
 }

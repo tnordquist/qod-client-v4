@@ -10,7 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "BASE_URL", '"https://java-bootcamp.cnm.edu/rest/qod/"'
+        buildConfigField "String", "BASE_URL", '"http://10.0.2.2:28282/rest/qod/"'
     }
     buildTypes {
         release {
@@ -21,6 +21,9 @@ android {
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
+    }
+    dataBinding {
+        enabled = true
     }
 }
 

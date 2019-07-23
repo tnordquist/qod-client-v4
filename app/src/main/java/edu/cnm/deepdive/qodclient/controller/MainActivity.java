@@ -7,34 +7,33 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AlertDialog.Builder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.widget.TooltipCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import edu.cnm.deepdive.qodclient.R;
+import edu.cnm.deepdive.qodclient.databinding.ActivityMainBinding;
 import edu.cnm.deepdive.qodclient.model.Quote;
 import edu.cnm.deepdive.qodclient.service.GoogleSignInService;
 import edu.cnm.deepdive.qodclient.viewmodel.MainViewModel;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
+  private ActivityMainBinding binding;
   private MainViewModel viewModel;
-  private EditText searchTerm;
-  private ListView searchResults;
   private boolean randomIgnored = true;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
     setupViewModel();
+    setupBinding();
+    setupObservers();
     setupToolbar();
     setupSearch();
     setupFab();
@@ -62,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
   @Override
   public void onItemClick(AdapterView<?> adapterView, View view, int position, long rowId) {
     Quote quote = (Quote) adapterView.getItemAtPosition(position);
-    String term = searchTerm.getText().toString().trim();
+    String term = binding.content.searchTerm.getText().toString().trim();
     String title = term.isEmpty() ? getString(R.string.search_all)
         : getString(R.string.search_title_format, term);
     Runnable next = (position >= adapterView.getCount() - 1) ? null : () -> {
       if (position < adapterView.getCount() - 1) {
-        searchResults.performItemClick(null, position + 1,
-            searchResults.getItemIdAtPosition(position + 1));
+        binding.content.searchResults.performItemClick(null, position + 1,
+            binding.content.searchResults.getItemIdAtPosition(position + 1));
       }
     };
     showQuote(quote, title, next);
@@ -77,29 +76,34 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
   private void setupViewModel() {
     viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
     getLifecycle().addObserver(viewModel);
+  }
+
+  private void setupBinding() {
+    binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+    binding.setViewModel(viewModel);
+  }
+
+  private void setupObservers() {
     viewModel.randomQuote().observe(this, (quote) -> {
       if (!randomIgnored) {
-        showQuote(quote, getString(R.string.random_quote_title), () -> viewModel.getRandomQuote());
+        showQuote(quote, getString(R.string.random_quote_title), () -> viewModel.nextRandomQuote());
       }
     });
     viewModel.searchResults().observe(this, (quotes) -> {
       ArrayAdapter<Quote> adapter =
           new ArrayAdapter<>(this, R.layout.quote_list_item, quotes);
-      searchResults.setAdapter(adapter);
+      binding.content.searchResults.setAdapter(adapter);
     });
   }
 
   private void setupSearch() {
-    ImageButton search = findViewById(R.id.search);
-    ImageButton clear = findViewById(R.id.clear);
-    searchTerm = findViewById(R.id.search_term);
-    searchResults = findViewById(R.id.search_results);
-    search.setOnClickListener((v) -> viewModel.search(searchTerm.getText().toString().trim()));
-    clear.setOnClickListener((v) -> {
-      searchTerm.getText().clear();
-      viewModel.search(null);
+    binding.content.search.setOnClickListener((v) -> viewModel.search());
+    binding.content.clear.setOnClickListener((v) -> {
+      binding.content.searchTerm.getText().clear();
+      viewModel.setSearchTerm(null);
+      viewModel.search();
     });
-    searchResults.setOnItemClickListener(this);
+    binding.content.searchResults.setOnItemClickListener(this);
   }
 
   private void setupToolbar() {
@@ -111,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     FloatingActionButton fab = findViewById(R.id.fab);
     fab.setOnClickListener(view -> {
       randomIgnored = false;
-      viewModel.getRandomQuote();
+      viewModel.nextRandomQuote();
     });
     TooltipCompat.setTooltipText(fab, getString(R.string.random_quote_tooltip));
   }
