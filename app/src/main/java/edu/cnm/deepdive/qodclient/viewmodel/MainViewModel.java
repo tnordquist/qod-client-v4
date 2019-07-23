@@ -11,6 +11,7 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.OnLifecycleEvent;
+import edu.cnm.deepdive.qodclient.BR;
 import edu.cnm.deepdive.qodclient.model.Quote;
 import edu.cnm.deepdive.qodclient.service.QodService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -68,13 +69,19 @@ public class MainViewModel extends AndroidViewModel
     }
   }
 
+  public void clear() {
+    setSearchTerm(null);
+    searchResults.setValue(new LinkedList<>());
+  }
+
   @Bindable
   public String getSearchTerm() {
     return searchTerm;
   }
 
   public void setSearchTerm(String searchTerm) {
-    this.searchTerm = searchTerm;
+    this.searchTerm = (searchTerm != null) ? searchTerm.trim() : null;
+    notifyPropertyChanged(BR.searchTerm);
   }
 
   @OnLifecycleEvent(Event.ON_STOP)

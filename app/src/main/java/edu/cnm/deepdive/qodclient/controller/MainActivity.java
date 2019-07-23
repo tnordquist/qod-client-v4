@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AlertDialog.Builder;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
   private ActivityMainBinding binding;
   private MainViewModel viewModel;
+  private ListView searchResults;
   private boolean randomIgnored = true;
 
   @Override
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     setupBinding();
     setupObservers();
     setupToolbar();
-    setupSearch();
+    setupList();
     setupFab();
   }
 
@@ -61,13 +63,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
   @Override
   public void onItemClick(AdapterView<?> adapterView, View view, int position, long rowId) {
     Quote quote = (Quote) adapterView.getItemAtPosition(position);
-    String term = binding.content.searchTerm.getText().toString().trim();
+    String term = viewModel.getSearchTerm();
     String title = term.isEmpty() ? getString(R.string.search_all)
         : getString(R.string.search_title_format, term);
     Runnable next = (position >= adapterView.getCount() - 1) ? null : () -> {
       if (position < adapterView.getCount() - 1) {
-        binding.content.searchResults.performItemClick(null, position + 1,
-            binding.content.searchResults.getItemIdAtPosition(position + 1));
+        searchResults.performItemClick(null, position + 1,
+            searchResults.getItemIdAtPosition(position + 1));
       }
     };
     showQuote(quote, title, next);
@@ -92,23 +94,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     viewModel.searchResults().observe(this, (quotes) -> {
       ArrayAdapter<Quote> adapter =
           new ArrayAdapter<>(this, R.layout.quote_list_item, quotes);
-      binding.content.searchResults.setAdapter(adapter);
+      searchResults.setAdapter(adapter);
     });
-  }
-
-  private void setupSearch() {
-    binding.content.search.setOnClickListener((v) -> viewModel.search());
-    binding.content.clear.setOnClickListener((v) -> {
-      binding.content.searchTerm.getText().clear();
-      viewModel.setSearchTerm(null);
-      viewModel.search();
-    });
-    binding.content.searchResults.setOnItemClickListener(this);
   }
 
   private void setupToolbar() {
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
+  }
+
+  private void setupList() {
+    searchResults = binding.content.searchResults;
+    searchResults.setOnItemClickListener(this);
   }
 
   private void setupFab() {
