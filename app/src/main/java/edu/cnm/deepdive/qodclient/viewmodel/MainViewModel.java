@@ -12,7 +12,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.OnLifecycleEvent;
 import edu.cnm.deepdive.qodclient.BR;
+import edu.cnm.deepdive.qodclient.BuildConfig;
 import edu.cnm.deepdive.qodclient.model.Quote;
+import edu.cnm.deepdive.qodclient.service.GoogleSignInService;
 import edu.cnm.deepdive.qodclient.service.QodService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -28,9 +30,13 @@ public class MainViewModel extends AndroidViewModel
   private MutableLiveData<Quote> random;
   private MutableLiveData<List<Quote>> searchResults;
   private CompositeDisposable pending = new CompositeDisposable();
+  private String oauthHeader;
 
   public MainViewModel(@NonNull Application application) {
     super(application);
+    oauthHeader = String
+        .format(BuildConfig.AUTHORIZATION_FORMAT,
+            GoogleSignInService.getInstance().getAccount().getIdToken());
   }
 
   public LiveData<Quote> randomQuote() {
@@ -42,7 +48,7 @@ public class MainViewModel extends AndroidViewModel
 
   public void nextRandomQuote() {
     pending.add(
-        QodService.getInstance().random()
+        QodService.getInstance().random(oauthHeader)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe((quote) -> random.setValue(quote))
@@ -59,7 +65,7 @@ public class MainViewModel extends AndroidViewModel
   public void search() {
     if (searchTerm != null) {
       pending.add(
-          QodService.getInstance().search(searchTerm)
+          QodService.getInstance().search(oauthHeader,searchTerm)
               .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe((quotes) -> searchResults.setValue(quotes))
